@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+  <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
+  <script>
+    async function model() {
+      model = undefined;
+      model = await tf.loadLayersModel("http://127.0.0.1:5500//Model//model.json");
+      console.log("Successfully loaded Model");}
+      model();
+
+
+function prep(image)
+{     let tensor = tf.browser.fromPixels(image)
+        .mean(2)
+        .expandDims(0)
+        .expandDims(-1);
+      const resized = tf.image.resizeBilinear(tensor, [130, 130]);
+      const offset = tf.scalar(255.0);
+      const normalized  = resized.div(offset);
+      console.log(normalized);
+      return normalized}
+
+
+    function prediction() {
+    var imgData = document.getElementById('output');
+    var prediction = model.predict(prep(imgData)).dataSync()
+    console.log(prediction)          
+    if(prediction[1]<prediction[0]){
+      document.getElementById('name').innerHTML = "Mask :)";
+      console.log("Mask :)");
+    }  
+    else{
+      document.getElementById('name').innerHTML = "No Mask :(";
+      console.log("No Mask :(");
+      
+    }
+    }
+   
+  var loadFile = function(event) {
+	var image = document.getElementById('output');
+	image.src = URL.createObjectURL(event.target.files[0]);
+  };
+</script>
+
+</head>
+<style>
+  body {
+    background-image: url('10.jpeg');
+  }
+  hr.new5 {
+    border: 10px solid blueviolet;
+    border-radius: 5px;
+  }
+  </style>
+<body >
+    <div class="container text-center body">
+      <hr class="new5">
+      <h1>-( Face Mask DETECTION )-</h1>
+      <hr class="new5">
+      <p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
+      <p><label for="file" style="cursor: pointer;">Upload Image - CLICK</label></p>   
+      <p><img id="output" width="300" height = "300"/></p>
+      <button onclick="prediction()">Check</button>   
+      <hr class="new5">
+      <h4 class="text-center" style="font-size:30px;" id = "name"></h4>
+       </div>
+</body>
+</html>
